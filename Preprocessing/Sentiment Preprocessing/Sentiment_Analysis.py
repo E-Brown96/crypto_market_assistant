@@ -7,12 +7,17 @@ import datetime
 from datetime import datetime
 from transformers import BertTokenizer, BertForSequenceClassification
 from transformers import pipeline
+import os
 
 def sentiment_processor():
     #Step 1: Load the datasets
-    df_2019 = pd.read_csv('Raw_Data/2019_2021_data.csv')
-    df_2021 = pd.read_csv('Raw_Data/2021_2022_data.csv')
-    df_2022 = pd.read_csv('Raw_Data/sentimental_data.csv')
+    route_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    df_2019 = pd.read_csv(os.path.join(route_path,'Raw_Data','2019_2021_data.csv'))
+    df_2021 = pd.read_csv(os.path.join(route_path,'Raw_Data','2021_2022_data.csv'))
+    df_2022 = pd.read_csv(os.path.join(route_path,'Raw_Data','sentimental_data.csv'))
+    #df_2019 = pd.read_csv('../../Raw_Data/2019_2021_data.csv')
+    #df_2021 = pd.read_csv('../../Raw_Data/2021_2022_data.csv')
+    #df_2022 = pd.read_csv('../../Raw_Data/sentimental_data.csv')
 
     #Step 2: Remove unneeded columns
 
@@ -86,10 +91,12 @@ def sentiment_processor():
     scored_df['average_score'] = (scored_df['scored_title'] + scored_df['scored_text'])/2
 
     #Select the columns we want to use
-    processed_text_df = scored_df[['date','sentiment','scored_title','scored_text','average_score']]
+    processed_text_df = scored_df[['date','scored_title','scored_text','average_score']]
 
     #Create a final df that finds the mean sentiment score for each day
     final_text_df = processed_text_df.groupby('date', as_index=False).mean()
 
     #Return the final dataframe with the following columns: date, scored_title, scored_text and average_score
     return final_text_df
+
+print(sentiment_processor())
