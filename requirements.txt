@@ -3,3 +3,6 @@ numpy
 matplotlib
 tensorflow
 seaborn
+
+transformers
+torch
