@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
+import os
 
 #===================SETTINGS=======================#
 #Check path for Currency and Dates first!
@@ -15,8 +16,9 @@ start_date      = "2017-08-17"    #BTC from  "2017-08-17"
 end_date        = "2023-11-30"    #BTC until "2023-11-30"
 sample_period   = "D"             #daily
 #==================================================#
-csv_filename = "raw_data/"+curreny+"_"+sample_period+".csv"
-foldername = "raw_data/"+curreny+"_DL"
+route_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+csv_filename = route_path+"Raw_data/"+curreny+"_"+sample_period+".csv"
+foldername = route_path+"Raw_data/"+curreny+"_DL"
 
 #Original Path for Browser:
 #https://data.binance.vision/?prefix=data/spot/daily/klines/BTCUSDT/1m/

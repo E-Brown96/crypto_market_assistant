@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import os
 
 def get_fear_and_greed_index(limit=1):
     url = f"https://api.alternative.me/fng/?limit={limit}"
@@ -30,5 +31,6 @@ FAGI_data['date'] = pd.to_datetime(FAGI_data["date"], unit="s")
 FAGI_data.set_index("date", inplace=True)
 FAGI_data = FAGI_data.sort_values(by="date")
 
-FAGI_data.to_csv("/raw-data/FearAndGreedIndex.csv") #Filename defined in the settings
+route_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+FAGI_data.to_csv(os.path.join(route_path, 'Raw_Data','FearAndGreedIndex.csv')) #Filename defined in the settings
 print("File created: FearAndGreedIndex.csv")
