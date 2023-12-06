@@ -1,11 +1,48 @@
 import pandas as pd
+import pandas_ta as pta
 import numpy as np
 import os
 from sklearn.impute import SimpleImputer, KNNImputer
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, RobustScaler, StandardScaler
+from sklearn.preprocessing import OrdinalEncoder
 
-#The first part of the preprocessing stage is to merge the datafiles
+#The first part of the preprocessing stage is to calculate TA indicators on the chart data
+
+def ta_indicators(file_BTC:str):
+    #Create route path and extract the BTC dataframe
+    route_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BTC = pd.read_csv(os.path.join(route_path, 'raw_data',file_BTC))
+
+    #Create the RSI class
+    RSI = pta.rsi(BTC['close'], length = 14)    #Calc RSI
+    RSI = RSI.replace(np.NaN, 50)               #clean NAN values
+    BTC["RSI"] = RSI
+
+    # Add RSI Class to df
+    # [-1] Oversold <= 30
+    # [+1] Overbought >= 70
+    # [0]  Neutral 30-70
+    BTC['RSI_class'] = np.where(RSI > 70, 1, np.where(RSI < 30, -1, 0))
+
+    #Calculate ADX and create ADX class
+    ADX_df = pta.adx(BTC['high'], BTC['low'], BTC['close'], length=14) #Calc ADX
+    ADX = ADX_df.drop(columns=["DMP_14", "DMN_14"]) #Clean up columns
+    ADX = ADX.replace(np.NaN, 0)                    #Clean NaN values
+    BTC["ADX"] = ADX                                #Add RSI column to BTC df
+
+    # Add ADX_Class to df
+    #[1] 0 – 25	    Absent or Weak Trend
+    #[2] 25 – 50	Strong Trend
+    #[3] 50 – 75	Very Strong Trend
+    #[4] 75 – 100	Extremely Strong Trend
+    BTC['ADX_class'] = np.where(ADX <= 25, 1,
+                        np.where(ADX <= 50, 2,
+                            np.where(ADX <= 75, 3,
+                                4)))
+    print(BTC)
+    return BTC
+
+ta_indicators('BTCUSDT_daily.csv')
+
 
 '''
 Inputs need to be the the filename of the saved csv files, must be strings ending with .csv:
@@ -22,7 +59,7 @@ def data_merging(file_BTC:str,file_Sentimental:str,file_Social:str,file_FAGI:str
     #Extract the dataframes from Raw Data folder using filenames
     df_sentimental = pd.read_csv(os.path.join(route_path, 'raw_data',file_Sentimental))
     df_social = pd.read_csv(os.path.join(route_path, 'raw_data',file_Social))
-    df_binance = pd.read_csv(os.path.join(route_path, 'raw_data',file_BTC))
+    df_binance = file_BTC
     df_fear_and_greed = pd.read_csv(os.path.join(route_path, 'raw_data',file_FAGI))
 
     #The chart data makes a dataframe where the first column is called time,
@@ -138,8 +175,11 @@ def data_scaling(df_merge: pd.DataFrame, scaler):
 
 def preprocessor(file_BTC:str,file_Sentimental:str,file_Social:str,file_FAGI:str, scaler):
 
+    #Call TA indicators
+    df_BTC = ta_indicators(file_BTC=file_BTC)
+
     #Call data merging
-    df_merge = data_merging(file_BTC=file_BTC,file_Sentimental=file_Sentimental,file_Social=file_Social,file_FAGI=file_FAGI)
+    df_merge = data_merging(file_BTC=df_BTC,file_Sentimental=file_Sentimental,file_Social=file_Social,file_FAGI=file_FAGI)
 
     #Call imputer
     df_merge = imputing(df_merge=df_merge)
@@ -154,8 +194,11 @@ def preprocessor(file_BTC:str,file_Sentimental:str,file_Social:str,file_FAGI:str
 
 def preprocessor_not_scaled(file_BTC:str,file_Sentimental:str,file_Social:str,file_FAGI:str):
 
+    #Call TA indicators
+    df_BTC = ta_indicators(file_BTC=file_BTC)
+
     #Call data merging
-    df_merge = data_merging(file_BTC=file_BTC,file_Sentimental=file_Sentimental,file_Social=file_Social,file_FAGI=file_FAGI)
+    df_merge = data_merging(file_BTC=df_BTC,file_Sentimental=file_Sentimental,file_Social=file_Social,file_FAGI=file_FAGI)
 
     #Call imputer
     df_merge = imputing(df_merge=df_merge)

@@ -17,3 +17,4 @@ def update_data():
     sentimental_data()
 
     print('✅ All dataframes have been updated.')
+update_data()

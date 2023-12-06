@@ -158,7 +158,7 @@ def chart_data():
 
             # Remove temp files ===========================================================#
             #Check if new CSV file exist and zipped files was ok.
-            if len(csv_files) == len(zip_files) and Path(csv_filename).exists():
+            if len(csv_files) == len(zip_files) and Path((os.path.join(route_path, 'raw_data','BTCUSDT_daily.csv'))).exists():
                 shutil.rmtree(destination_folder)
                 print("Temp files removed")
             else:
