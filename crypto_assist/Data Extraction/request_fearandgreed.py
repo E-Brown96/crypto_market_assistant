@@ -32,5 +32,6 @@ FAGI_data.set_index("date", inplace=True)
 FAGI_data = FAGI_data.sort_values(by="date")
 
 route_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-FAGI_data.to_csv(os.path.join(route_path, 'raw_data','FearAndGreedIndex.csv')) #Filename defined in the settings
-print("File created: /raw-data/FearAndGreedIndex.csv")
+
+FAGI_data.to_csv(os.path.join(route_path, 'raw_Data','FearAndGreedIndex.csv')) #Filename defined in the settings
+print("File created: FearAndGreedIndex.csv")
