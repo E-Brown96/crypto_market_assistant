@@ -17,7 +17,7 @@ Inputs need to be the the filename of the saved csv files, must be strings endin
 
 def data_merging(file_BTC:str,file_Sentimental:str,file_Social:str,file_FAGI:str):
     #Create the route path so it can be used on any machine
-    route_path = os.getcwd()
+    route_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     #Extract the dataframes from Raw Data folder using filenames
     df_sentimental = pd.read_csv(os.path.join(route_path, 'raw_data',file_Sentimental))
