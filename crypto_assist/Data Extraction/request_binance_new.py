@@ -7,16 +7,29 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from datetime import timedelta
+
+today = datetime.now().strftime("%Y-%m-%d")
+
+#Define Start Date
+route_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+df_binance = pd.read_csv(os.path.join(route_path, 'raw_data','BTCUSDT_daily.csv'))
+last_date = df_binance['time'].iloc[-1]
+date_object_last_date = datetime.strptime(last_date, '%Y-%m-%d')
+new_date = datetime.strptime(last_date, '%Y-%m-%d') + timedelta(days=1)
+auto_start_date = new_date.strftime("%Y-%m-%d")
 
 #===================SETTINGS=======================#
 #Check path for Currency and Dates first!
 curreny         = "BTCUSDT"       #BTCUSDT
-start_date      = "2017-08-17"    #BTC from  "2017-08-17"
-end_date        = "2023-11-30"    #BTC until "2023-11-30"
+start_date      = auto_start_date #BTC from  "2017-08-17"
+end_date        = today           #BTC until "2023-11-30"
 sample_period   = "D"             #daily
 #==================================================#
+
 route_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-csv_filename = route_path+"/raw_data/"+curreny+"_"+sample_period+"_Binance.csv"
+csv_filename = route_path+"/raw_data/"+curreny+"_"+sample_period+"_Binance_new.csv"
 foldername = route_path+"/raw_data/"+curreny+"_DL"
 
 #Original Path for Browser:

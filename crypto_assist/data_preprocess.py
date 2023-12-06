@@ -151,3 +151,16 @@ def preprocessor(file_BTC:str,file_Sentimental:str,file_Social:str,file_FAGI:str
 
     #Return processed data
     return df_merge
+
+def preprocessor_not_scaled(file_BTC:str,file_Sentimental:str,file_Social:str,file_FAGI:str):
+
+    #Call data merging
+    df_merge = data_merging(file_BTC=file_BTC,file_Sentimental=file_Sentimental,file_Social=file_Social,file_FAGI=file_FAGI)
+
+    #Call imputer
+    df_merge = imputing(df_merge=df_merge)
+
+    print("✅ Data has been processed")
+
+    #Return processed data
+    return df_merge
