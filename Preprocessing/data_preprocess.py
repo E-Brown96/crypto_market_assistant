@@ -20,10 +20,10 @@ def data_merging(file_BTC:str,file_Sentimental:str,file_Social:str,file_FAGI:str
     route_path = os.getcwd()
 
     #Extract the dataframes from Raw Data folder using filenames
-    df_sentimental = pd.read_csv(os.path.join(route_path, 'Raw_Data',file_Sentimental))
-    df_social = pd.read_csv(os.path.join(route_path, 'Raw_Data',file_Social))
-    df_binance = pd.read_csv(os.path.join(route_path, 'Raw_Data',file_BTC))
-    df_fear_and_greed = pd.read_csv(os.path.join(route_path, 'Raw_Data',file_FAGI))
+    df_sentimental = pd.read_csv(os.path.join(route_path, 'raw_data',file_Sentimental))
+    df_social = pd.read_csv(os.path.join(route_path, 'raw_data',file_Social))
+    df_binance = pd.read_csv(os.path.join(route_path, 'raw_data',file_BTC))
+    df_fear_and_greed = pd.read_csv(os.path.join(route_path, 'raw_data',file_FAGI))
 
     #The chart data makes a dataframe where the first column is called time,
     #we need to replace that with date
