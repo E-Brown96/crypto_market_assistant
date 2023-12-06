@@ -17,8 +17,8 @@ end_date        = "2023-11-30"    #BTC until "2023-11-30"
 sample_period   = "D"             #daily
 #==================================================#
 route_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-csv_filename = route_path+"Raw_data/"+curreny+"_"+sample_period+".csv"
-foldername = route_path+"Raw_data/"+curreny+"_DL"
+csv_filename = route_path+"raw_data/"+curreny+"_"+sample_period+".csv"
+foldername = route_path+"raw_data/"+curreny+"_DL"
 
 #Original Path for Browser:
 #https://data.binance.vision/?prefix=data/spot/daily/klines/BTCUSDT/1m/
