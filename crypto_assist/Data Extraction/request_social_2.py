@@ -24,15 +24,11 @@ def check_social_data():
     #Convert this last date into a date
     date_object_last_date = datetime.strptime(last_date, date_format)
 
-    def days_to_fetch(date_object_today=date_object_today, date_object_last_date=date_object_last_date):
-        if date_object_today == date_object_last_date:
-            return date_object_today
+    def days_to_fetch(start=date_object_today, final=date_object_last_date):
+        if start == final:
+            return start
         else:
-            return (date_object_today - date_object_last_date).days - timedelta(days=1)
-
-    print(date_object_last_date)
-
-    print(days_to_fetch)
+            return (start - final).days
 
 
     def date_check(days_to_fetch=days_to_fetch(), date_object_today=date_object_today):
@@ -59,13 +55,13 @@ def check_social_data():
             #Now create a dataframe for the data
             df = pd.DataFrame(updated_data)
             df.columns=['date','twitter_followers','twitter_favourites','reddit_subscribers','reddit_active_users','reddit_comments_per_day']
-
+            df = df.drop(0)
+            df = df.reset_index(drop=True)
             #Now convert the date column to datetime year month day
             df['date'] = df['date'].apply(lambda timestamp: datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'))
 
             #Finally save the resulting dataframe to a file
             print('✅The new data has been successfully extracted and the new dataframe to be added is below.')
-            print(df)
 
             df.to_csv((os.path.join(route_path, 'raw_data','social_number_data.csv')), mode='a', header=False, index=False)
     date_check()
