@@ -10,5 +10,4 @@ COPY crypto_assist crypto_assist
 COPY setup.py setup.py
 RUN pip install .
 
-EXPOSE 8000
 CMD uvicorn crypto_assist.API.fast:app --host 0.0.0.0 --port $PORT
