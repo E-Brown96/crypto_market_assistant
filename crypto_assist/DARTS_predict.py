@@ -1,45 +1,12 @@
-import pandas as pd
-import datetime as dt
-import matplotlib.pyplot as plt
-import numpy as np
-import torch
-import pickle
-
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from torchmetrics import SymmetricMeanAbsolutePercentageError
 from darts.metrics import mape, smape, mae
-from darts.dataprocessing.transformers import Scaler
-from darts import TimeSeries
-from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, RobustScaler, StandardScaler
-from data_preprocess import preprocessor_not_scaled
+import pickle
+from darts.models import BlockRNNModel
 
-from darts.utils.timeseries_generation import (
-    gaussian_timeseries,
-    linear_timeseries,
-    sine_timeseries,
-)
-from darts.models import (
-    RNNModel,
-    TCNModel,
-    TransformerModel,
-    NBEATSModel,
-    BlockRNNModel,
-    VARIMA,
-)
-import logging
-logging.disable(logging.CRITICAL)
-
-import warnings
-warnings.filterwarnings("ignore")
-
-# for reproducibility
-torch.manual_seed(1)
-np.random.seed(1)
-
-with open('DARTS_model.pkl', 'rb') as file:
+with open('DARTS_vars.pkl', 'rb') as file:
     DARTS_model_vars = pickle.load(file)
+scaled_df, ts_scaler_target, val, test, train = DARTS_model_vars
 
-scaled_df, ts_scaler_target, val, test, train, train_model = DARTS_model_vars
+train_model = BlockRNNModel.load("DARTS_model.pkl")
 
 def model_predict_accuracy():
     ### __*Do a prediction*__
@@ -62,6 +29,7 @@ def model_predict_accuracy():
 
 
 def model_predict():
+    print(type(train_model))
     pred_cov = train_model.predict(n=7,    # n of days to predict ####
                 series=test["close"][-25:],  # target input for prediction
                 past_covariates=test[-25:])  # past-covariates input for prediction
@@ -69,4 +37,4 @@ def model_predict():
 
     return pred_7days
 
-print(model_predict_accuracy())
+print(model_predict())

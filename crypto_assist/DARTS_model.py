@@ -112,9 +112,11 @@ def DARTS_model():
     scaled_df, ts_scaler_target = scaling()
     val, test, train = train_test_split()
     train_model = train_model()
-    return scaled_df, ts_scaler_target, val, test, train, train_model
+    train_model.save("DARTS_model.pkl")
+
+    return scaled_df, ts_scaler_target, val, test, train
 
 DARTS_model_vars = DARTS_model()
 
-with open('DARTS_model.pkl', 'wb') as file:
+with open('DARTS_vars.pkl', 'wb') as file:
     pickle.dump(DARTS_model_vars, file)
