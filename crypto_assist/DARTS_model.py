@@ -3,6 +3,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import pickle
 
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from torchmetrics import SymmetricMeanAbsolutePercentageError
@@ -39,7 +40,7 @@ np.random.seed(1)
 def DARTS_model():
     def preprocessing():
         ### __*Preprocessing*__
-        df = preprocessor_not_scaled('BTCUSDT_daily_Binance.csv','final_text_df.csv','social_number_data.csv','FearAndGreedIndex.csv')
+        df = preprocessor_not_scaled('BTCUSDT_daily.csv','final_text_df.csv','social_number_data.csv','FearAndGreedIndex.csv')
         df.index = pd.to_datetime(df.date)
         df.drop(columns="date",inplace=True)
         return df
@@ -108,12 +109,21 @@ def DARTS_model():
             verbose=True,
         )
         return model_int
-    return train_model(), train_test_split(), scaling()
+    scaled_df, ts_scaler_target = scaling()
+    val, test, train = train_test_split()
+    train_model = train_model()
+    return scaled_df, ts_scaler_target, val, test, train, train_model
+
+DARTS_model_vars = DARTS_model()
+
+with open('model.pkl', 'wb') as file:
+    pickle.dump(DARTS_model_vars, 'model')
+
+scaled_df, ts_scaler_target, val, test, train, train_model = DARTS_model_vars
 
 def model_predict_accuracy():
     ### __*Do a prediction*__
-    model, val, test, train, scaled_df, ts_scaler_target = DARTS_model()
-    pred_cov = model.predict(n=7,    # n of days to predict ####
+    pred_cov = train_model.predict(n=7,    # n of days to predict ####
                 series=test["close"][-25-7:-7],  # target input for prediction the current week
                 past_covariates=test[-25-7:-7])  # past-covariates input for prediction the current week
 
@@ -131,10 +141,13 @@ def model_predict_accuracy():
     return smape_actual_pred, actual_last_7days, pred_last_7days
 
 def model_predict():
-    model, val, test, train, scaled_df, ts_scaler_target = DARTS_model()
-    pred_cov = model.predict(n=7,    # n of days to predict ####
+    pred_cov = train_model.predict(n=7,    # n of days to predict ####
                 series=test["close"][-25:],  # target input for prediction
                 past_covariates=test[-25:])  # past-covariates input for prediction
     pred_7days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
 
     return pred_7days
+
+DARTS_model()
+print(model_predict_accuracy())
+print(model_predict())
