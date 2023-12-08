@@ -112,42 +112,11 @@ def DARTS_model():
     scaled_df, ts_scaler_target = scaling()
     val, test, train = train_test_split()
     train_model = train_model()
-    return scaled_df, ts_scaler_target, val, test, train, train_model
+    train_model.save("DARTS_model.pkl")
+
+    return scaled_df, ts_scaler_target, val, test, train
 
 DARTS_model_vars = DARTS_model()
 
-with open('model.pkl', 'wb') as file:
-    pickle.dump(DARTS_model_vars, 'model')
-
-scaled_df, ts_scaler_target, val, test, train, train_model = DARTS_model_vars
-
-def model_predict_accuracy():
-    ### __*Do a prediction*__
-    pred_cov = train_model.predict(n=7,    # n of days to predict ####
-                series=test["close"][-25-7:-7],  # target input for prediction the current week
-                past_covariates=test[-25-7:-7])  # past-covariates input for prediction the current week
-
-    ### __*Result of the metrics*__
-    # check the SMAPE error
-
-    smape_actual_pred = smape(test['close'][-7:], pred_cov)
-
-    #Real Data
-    actual_last_7days = ts_scaler_target.inverse_transform(test['close'][-7:]).values() #Actual last 7 days
-
-    #Predicted Data
-    pred_last_7days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
-
-    return smape_actual_pred, actual_last_7days, pred_last_7days
-
-def model_predict():
-    pred_cov = train_model.predict(n=7,    # n of days to predict ####
-                series=test["close"][-25:],  # target input for prediction
-                past_covariates=test[-25:])  # past-covariates input for prediction
-    pred_7days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
-
-    return pred_7days
-
-DARTS_model()
-print(model_predict_accuracy())
-print(model_predict())
+with open('DARTS_vars.pkl', 'wb') as file:
+    pickle.dump(DARTS_model_vars, file)
