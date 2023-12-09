@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from crypto_assist.DARTS_predict import load_model, load_vars, model_predict, model_predict_accuracy
 
 app = FastAPI()
+app.state.model = load_model()
+app.state.vars = load_vars()
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -17,14 +20,20 @@ app.add_middleware(
 def root():
     return {'greeting':'Hello'}
 
+#Define a predict endpoint for the function
 @app.get('/predict')
 def predict():
-    return {'wait':64}
+    #Calling model_predict_accuracy and model_predict to get predictions
+    smape, actual, past_pred = model_predict_accuracy()
+    pred = model_predict()
 
+    #Turning the prediction results which are numpy arrays into lists and converting numbers into floats
+    actual = [float(item) for item in actual]
+    past_pred = [float(item) for item in past_pred]
+    pred = [float(item) for item in pred]
 
-'''@app.get('/predict')
-def predict(day_of_week, time):
-    # Compute `wait_prediction` from `day_of_week` and `time`
-    wait_prediction = int(day_of_week) * int(time)
-
-    return {'wait': wait_prediction}'''
+    return {'smape':float(smape),
+            'actual_price_last_7_days':actual,
+            'predicted_price_last_7_days': past_pred,
+            'predicted_price_for_next_7_days': pred,
+            }
