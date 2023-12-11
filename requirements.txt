@@ -21,3 +21,5 @@ fastapi
 pytz
 uvicorn
 darts
+
+streamlit

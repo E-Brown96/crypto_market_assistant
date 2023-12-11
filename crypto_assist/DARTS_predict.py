@@ -53,3 +53,6 @@ def model_predict():
     pred_7days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
 
     return pred_7days
+
+print(model_predict_accuracy())
+print(model_predict())
