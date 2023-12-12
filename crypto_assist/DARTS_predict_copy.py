@@ -30,9 +30,9 @@ def model_predict_accuracy():
     train_model = load_model()
     scaled_df, ts_scaler_target, val, test, train = load_vars()
     ### __*Do a prediction*__
-    pred_cov = train_model.predict(n=7,    # n of days to predict ####
-                series=test["close"][-45-7:-7],  # target input for prediction the current week
-                past_covariates=test[-45-7:-7],
+    pred_cov = train_model.predict(n=5,    # n of days to predict ####
+                series=test["close"][-35-5:-5],  # target input for prediction the current week
+                past_covariates=test[-35-5:-5],
                 )  # past-covariates input for prediction the current week
 
     ### __*Result of the metrics*__
@@ -53,9 +53,9 @@ def model_predict_accuracy():
 def model_predict():
     train_model = load_model()
     scaled_df, ts_scaler_target, val, test, train = load_vars()
-    pred_cov = train_model.predict(n=7,    # n of days to predict ####
-                series=test["close"][-25:],  # target input for prediction
-                past_covariates=test[-25:],
+    pred_cov = train_model.predict(n=5,    # n of days to predict ####
+                series=test["close"][-35:],  # target input for prediction
+                past_covariates=test[-35:],
                 )  # past-covariates input for prediction
     pred_7days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
 
