@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from crypto_assist.DARTS_predict import load_model, load_vars, model_predict, model_predict_accuracy
+from crypto_assist.DARTS_predict_copy import load_model, load_vars, smape_function, model_predict, model_predict_accuracy, model_predict
+
 
 app = FastAPI()
 app.state.model = load_model()
@@ -27,13 +28,14 @@ def predict():
     smape, actual, past_pred = model_predict_accuracy()
     pred = model_predict()
 
+
     #Turning the prediction results which are numpy arrays into lists and converting numbers into floats
     actual = [float(item) for item in actual]
     past_pred = [float(item) for item in past_pred]
     pred = [float(item) for item in pred]
 
     return {'smape':float(smape),
-            'actual_price_last_7_days':actual,
-            'predicted_price_last_7_days': past_pred,
-            'predicted_price_for_next_7_days': pred,
+            'actual_price_last_5_days':actual,
+            'predicted_price_last_5_days': past_pred,
+            'predicted_price_for_next_5_days': pred,
             }
