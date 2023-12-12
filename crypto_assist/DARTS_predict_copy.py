@@ -30,32 +30,32 @@ def model_predict_accuracy():
     train_model = load_model()
     scaled_df, ts_scaler_target, val, test, train = load_vars()
     ### __*Do a prediction*__
-    pred_cov = train_model.predict(n=7,    # n of days to predict ####
-                series=test["close"][-45-7:-7],  # target input for prediction the current week
-                past_covariates=test[-45-7:-7],
+    pred_cov = train_model.predict(n=5,    # n of days to predict ####
+                series=test["close"][-35-5:-5],  # target input for prediction the current week
+                past_covariates=test[-35-5:-5],
                 )  # past-covariates input for prediction the current week
 
     ### __*Result of the metrics*__
 
     #Real Data
-    actual_last_7days = ts_scaler_target.inverse_transform(test['close'][-7:]).values() #Actual last 7 days
+    actual_last_5days = ts_scaler_target.inverse_transform(test['close'][-5:]).values() #Actual last 7 days
 
     #Predicted Data
-    pred_last_7days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
+    pred_last_5days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
 
     # check the SMAPE error
-    #smape_actual_pred = smape(test['close'][-7:], pred_cov)
-    smape_actual_pred = smape_function(actual_last_7days, pred_last_7days)
+    #smape_actual_pred = smape(test['close'][-5:], pred_cov)
+    smape_actual_pred = smape_function(actual_last_5days, pred_last_5days)
 
-    return smape_actual_pred, actual_last_7days, pred_last_7days
+    return smape_actual_pred, actual_last_5days, pred_last_5days
 
 
 def model_predict():
     train_model = load_model()
     scaled_df, ts_scaler_target, val, test, train = load_vars()
-    pred_cov = train_model.predict(n=7,    # n of days to predict ####
-                series=test["close"][-25:],  # target input for prediction
-                past_covariates=test[-25:],
+    pred_cov = train_model.predict(n=5,    # n of days to predict ####
+                series=test["close"][-35:],  # target input for prediction
+                past_covariates=test[-35:],
                 )  # past-covariates input for prediction
     pred_7days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
 

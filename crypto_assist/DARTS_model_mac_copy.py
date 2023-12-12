@@ -50,6 +50,7 @@ def DARTS_model():
         df.index = pd.to_datetime(df.date)
         df.drop(columns="date",inplace=True)
         df.drop(columns=["RSI"], inplace=True)
+        df = df.loc['2019-1-01':]
         return df
 
     def scaling():
@@ -72,7 +73,7 @@ def DARTS_model():
         train, val = X.split_before(0.8)
         #train.plot(label="training")
         #val.plot(label="validation")
-        val,test = val.split_before(0.5)
+        val,test = val.split_before(0.85)
         return val, test, train
 
     def earlystop():
@@ -92,11 +93,11 @@ def DARTS_model():
         # predict 7 days considering the latest 45 days
         model_covariates = BlockRNNModel(
             model="LSTM",
-            input_chunk_length= 45,
-            output_chunk_length=7,
+            input_chunk_length= 35,
+            output_chunk_length=5,
             torch_metrics= SymmetricMeanAbsolutePercentageError(),
             n_epochs=500,
-            hidden_dim = 88,
+            hidden_dim = 70,
             n_rnn_layers = 1,
             pl_trainer_kwargs = {"callbacks": [earlystop()],
                                  "accelerator": "cpu"},
