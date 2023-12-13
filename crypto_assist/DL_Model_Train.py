@@ -57,7 +57,7 @@ def train_model():
 
     fold = folds[-1]  #Using most recent Fold
 
-    INPUT_LENGTH = 21            # We can assume 7 days for a forecating period
+    INPUT_LENGTH = 45            # We can assume 7 days for a forecating period
     OUTPUT_LENGTH = 5           # If we want predict one week ahead
     TEMP_TRAIN_TEST_RATIO = 0.8 # How we want to split each fold (can be same as train test ratio)
 
@@ -191,13 +191,19 @@ def train_model():
     print(baseline_score)
 
 
+    X_future = fold[:][-INPUT_LENGTH:]
+    X_previous = fold[:][-(INPUT_LENGTH+OUTPUT_LENGTH):-OUTPUT_LENGTH]
+    print (X_future.index)
+    print (X_previous.index)
+
+
     def smape(y_true, y_pred):
         return tf.reduce_mean(((abs(y_true - y_pred)) / ((y_true + y_pred)/2))* 100, axis=-1)
 
 
     def init_model(X_train, y_train):
 
-        initial_learning_rate = 0.01 # Default Adam
+        initial_learning_rate = 0.001 # Default Adam
 
         lr_schedule = ExponentialDecay(
         initial_learning_rate,
@@ -281,7 +287,7 @@ def train_model():
     print(type(model))
     model.save('DL_Model_Trained.keras')
 
-    return X_test, y_test, baseline_score
+    return X_test, y_test, baseline_score, X_future, X_previous
 
 
 DL_Model_vars = train_model()
