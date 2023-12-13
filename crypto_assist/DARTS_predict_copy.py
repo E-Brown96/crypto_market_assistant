@@ -57,6 +57,28 @@ def model_predict():
                 series=test["close"][-35:],  # target input for prediction
                 past_covariates=test[-35:],
                 )  # past-covariates input for prediction
-    pred_7days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
+    pred_5days = ts_scaler_target.inverse_transform(pred_cov).values() #Prediction from last 7 days
 
-    return pred_7days
+    return pred_5days
+
+def prediction_hist():
+    train_model = load_model()
+    scaled_df, ts_scaler_target, val, test, train = load_vars()
+    historical_model = train_model.historical_forecasts(
+            series=[val["close"]],  # the target validation data
+            past_covariates=val,
+            start=0.3,
+            forecast_horizon=5,
+            verbose=False,
+            retrain=False
+    )
+    valid = val['close']
+    df_history = ts_scaler_target.inverse_transform(historical_model).values()
+    df_val = ts_scaler_target.inverse_transform(valid).values()
+
+
+
+
+    return df_history, df_val
+
+print(prediction_hist())
