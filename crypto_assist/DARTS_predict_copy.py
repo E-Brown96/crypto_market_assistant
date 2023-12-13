@@ -80,5 +80,3 @@ def prediction_hist():
 
 
     return df_history, df_val
-
-print(prediction_hist())
