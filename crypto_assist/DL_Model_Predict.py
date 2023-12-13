@@ -14,11 +14,11 @@ def DL_load_vars():
 
     with open('DL_vars.pkl', 'rb') as file:
         DL_Model_vars = pickle.load(file)
-    X_test, y_test, baseline_score = DL_Model_vars
+    X_test, y_test, baseline_score, X_future, X_previous = DL_Model_vars
 
-    return X_test, y_test, baseline_score
+    return X_test, y_test, baseline_score, X_future, X_previous
 
-X_test, y_test, baseline_score = DL_load_vars()
+X_test, y_test, baseline_score, X_future, X_previous = DL_load_vars()
 
 def evaluate_DL_model():
 
@@ -31,13 +31,16 @@ def baseline_comparison():
 
 
 def predict_last_7days():
-    return new_model.predict(X_test)[-1]
+    #print(X_previous.head())
+    return new_model.predict(tf.expand_dims(X_previous, 0))
 
-def actual_last_7days():
-    return y_test[-1]
+
+def predict_next_7days():
+    #print(X_future.head())
+    return new_model.predict(tf.expand_dims(X_future, 0))
 
 
 print(evaluate_DL_model())
 print(baseline_comparison())
 print(predict_last_7days())
-print(actual_last_7days())
+print(predict_next_7days())
