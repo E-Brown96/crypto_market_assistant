@@ -13,6 +13,8 @@ COPY setup.py setup.py
 COPY DARTS_model.pkl .
 COPY DARTS_vars.pkl .
 COPY DARTS_model.pkl.ckpt .
+COPY DL_Model_Trained.keras .
+COPY DL_vars.pkl .
 
 RUN pip install .
 

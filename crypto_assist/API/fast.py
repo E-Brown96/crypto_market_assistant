@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from crypto_assist.DARTS_predict_copy import load_model, load_vars, smape_function, model_predict, model_predict_accuracy, model_predict, prediction_hist
-
+from crypto_assist.DL_Model_Predict import predict_last_7days, predict_next_7days, DL_load_vars, DL_load_model
 
 app = FastAPI()
 app.state.model = load_model()
 app.state.vars = load_vars()
+app.state.model_DL = DL_load_model()
+app.state.vars_DL = DL_load_vars()
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -28,6 +30,8 @@ def predict():
     smape, actual, past_pred = model_predict_accuracy()
     pred = model_predict()
     df_history, df_val = prediction_hist()
+    DL_predict_last = predict_last_7days()
+    DL_predict_next = predict_next_7days()
 
 
     #Turning the prediction results which are numpy arrays into lists and converting numbers into floats
@@ -36,7 +40,8 @@ def predict():
     pred = [float(item) for item in pred]
     df_history = [float(item) for item in df_history]
     df_val = [float(item) for item in df_val]
-
+    DL_predict_last = DL_predict_last.tolist()
+    DL_predict_next = DL_predict_next.tolist()
 
 
     return {'smape':float(smape),
@@ -44,5 +49,7 @@ def predict():
             'predicted_price_last_5_days': past_pred,
             'predicted_price_for_next_5_days': pred,
             "historical_prediction": df_history,
-            "validation":df_val
+            "validation":df_val,
+            'DL_predict_last': DL_predict_last,
+            'DL_predict_next': DL_predict_next
             }
