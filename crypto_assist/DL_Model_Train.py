@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+from numpy import random
 import matplotlib.pyplot as plt
 import seaborn as sns
 import tensorflow as tf
@@ -19,6 +19,9 @@ import pickle
 
 from crypto_assist.data_preprocess import preprocessor_not_scaled
 
+tf.random.set_seed(42)
+np.random.seed(42)
+random.seed(42)
 
 
 def train_model():
@@ -31,22 +34,22 @@ def train_model():
 
 
     N_FEATURES = preprocessing().shape[1]  # All features other than time
-    N_TARGETS = 1                      # Prediciting only 1 target (close price)
+    N_TARGETS = 1                          # Prediciting only 1 target (close price)
     TARGET = 'close'
 
-    FOLD_LENGTH = int(len(preprocessing())/2)     # Assume fold length of 1 quarter
-    FOLD_STRIDE = int(len(preprocessing())/4)      # Assume stride every 10 days
-    TRAIN_TEST_RATIO = 0.67   # Two-thirds split ratio
+    FOLD_LENGTH = int(len(preprocessing())/2)     # Assume fold length of half the dataset
+    FOLD_STRIDE = int(len(preprocessing())/4)     # Assume stride every 10 days
+    TRAIN_TEST_RATIO = 0.5                        # 50-50 split ratio
 
     def get_folds(df: pd.DataFrame,
         fold_length: int,
         fold_stride: int) -> list[pd.DataFrame]:
 
         folds = []
-        for index in range(0, fold_length +1, fold_stride):
+        for index in range(0, fold_length, fold_stride):
             if index + fold_length > len(df):
                 break
-            fold = df.iloc[index:index + fold_length,:]
+            fold = df.iloc[index:index + fold_length +1,:]
             folds.append(fold)
         return folds
 
@@ -57,9 +60,9 @@ def train_model():
 
     fold = folds[-1]  #Using most recent Fold
 
-    INPUT_LENGTH = 45            # We can assume 7 days for a forecating period
-    OUTPUT_LENGTH = 5           # If we want predict one week ahead
-    TEMP_TRAIN_TEST_RATIO = 0.8 # How we want to split each fold (can be same as train test ratio)
+    INPUT_LENGTH = 10            # We can assume 10 days for a forecating period
+    OUTPUT_LENGTH = 5            # If we want predict 5 ahead
+    TEMP_TRAIN_TEST_RATIO = 0.95 # How we want to split each fold (can be same as train test ratio)
 
 
 
@@ -108,7 +111,8 @@ def train_model():
         return (Xi, yi)
 
 
-    def get_X_y_7(fold: pd.DataFrame,             input_length: int,
+    def get_X_y_7(fold: pd.DataFrame,
+                input_length: int,
                 output_length: int,
                 stride: int,
                 shuffle=True) -> tuple[np.ndarray, np.ndarray]:
@@ -203,56 +207,58 @@ def train_model():
 
     def init_model(X_train, y_train):
 
+        # adam = optimizers.Adam(learning_rate=0.02)
+
+
         initial_learning_rate = 0.001 # Default Adam
 
-        lr_schedule = ExponentialDecay(
-        initial_learning_rate,
-        decay_steps = 500,    # every 500 iterations
-        decay_rate = 0.5)      # we multiply the learning rate by the decay_rate
+        # lr_schedule = ExponentialDecay(
+        # initial_learning_rate,
+        # decay_steps = 10000,    # every 500 iterations
+        # decay_rate = 0.9)      # we multiply the learning rate by the decay_rate
 
 
-        adam = optimizers.Adam(learning_rate=lr_schedule)
+        # adam = optimizers.Adam(learning_rate=lr_schedule)
+        adam = optimizers.Adam()
 
 
         reg_l2 = regularizers.L2(0.05)
 
-        output_length = y_train.shape[1]
+        output_length = y_train.shape[-1]
 
-        normalizer = Normalization(input_shape= [X_train.shape[-2], X_train.shape[-1]], axis=None)
+        normalizer = Normalization(input_shape=[INPUT_LENGTH,N_FEATURES])
+
         normalizer.adapt(X_train)
 
         model = models.Sequential()
 
         model.add(normalizer)
 
-        model.add(layers.LSTM(512,
+        model.add(layers.LSTM(400,
                             activation='tanh',
                             return_sequences = True
                             ))
-        model.add(layers.LSTM(256,
+        model.add(layers.LSTM(100,
                             activation='tanh',
                             return_sequences = True
                             ))
-        model.add(layers.LSTM(128,
+        # model.add(layers.LSTM(128,
+        #                       activation='tanh',
+        #                       return_sequences = True, #kernel_regularizer = reg_l2
+        #                       ))
+        # model.add(layers.LSTM(64,
+        #                       activation='tanh',
+        #                       return_sequences = True, #kernel_regularizer = reg_l2
+        #                       ))
+        model.add(layers.LSTM(50,
                             activation='tanh',
-                            return_sequences = True, kernel_regularizer = reg_l2
+                            return_sequences = False, #kernel_regularizer = reg_l2
                             ))
-        model.add(layers.LSTM(64,
-                            activation='tanh',
-                            return_sequences = True, kernel_regularizer = reg_l2
+        # model.add(layers.Dropout(0.3))
+        model.add(layers.Dense(100, activation='relu'
                             ))
-        model.add(layers.LSTM(32,
-                            activation='tanh',
-                            return_sequences = False, kernel_regularizer = reg_l2
-                            ))
-        model.add(layers.Dropout(0.3))
-        model.add(layers.Dense(32, activation='relu'
-                            ))
-        model.add(layers.Dropout(0.3))
-        model.add(layers.Dense(16, activation='relu'
-                            ))
-        model.add(layers.Dropout(0.3))
-        model.add(layers.Dense(5, activation='elu'
+        # model.add(layers.Dropout(0.3))
+        model.add(layers.Dense(50, activation='relu'
                             ))
         model.add(layers.Dense(output_length, activation='linear'))
 
@@ -264,23 +270,24 @@ def train_model():
     def fit_model(model: tf.keras.Model, verbose=1) -> tuple[tf.keras.Model, dict]:
 
         es = EarlyStopping(monitor = "val_loss",
-                        patience = 10,
+                        patience = 150,
                         mode = "min",
                         restore_best_weights = True)
 
         #reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                                # patience=30, min_lr=0.000001)
+                            #   patience=30, min_lr=0.000001)
 
 
         history = model.fit(X_train, y_train,
-                            validation_split = 0.3,
+                            validation_split = 0.2,
                             shuffle = False,
-                            batch_size = 16,
-                            epochs = 50,
+                            batch_size = 64,
+                            epochs = 1000,
                             callbacks = [es],
                             verbose = verbose)
 
         return model, history
+
 
 
     model, history = fit_model(init_model(X_train, y_train))
